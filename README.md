@@ -7,9 +7,9 @@ Each homework focuses on a different Python concept, including loops, functions,
 ## Project List
 
 ### Homework 1 – Counting Weekends
-Line 1 description. 
-Line 2 description. 
-Line 3 description. 
+This assignment calculates how many weekends fall between two user-entered dates.
+It accepts multiple date formats, validates input, and counts full, Saturday-only, and Sunday-only weekends.
+The program uses the `datetime` module and allows repeated runs through a user prompt.
 
 ### Homework 2 – Contact List #1
 Line 1 description. 
@@ -63,8 +63,8 @@ python3 "Homework 7"/main.py
 ```
 
 ## Skills Learned
-- Skill #1
-- Skill #2
-- Skill #3
+- Input validation and error handling
+- Working with `datetime` module
+- Loops and conditional logic
 - Skill #4
 - Skill #5
