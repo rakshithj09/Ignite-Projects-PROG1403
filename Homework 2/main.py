@@ -1,3 +1,10 @@
+"""
+Course: PROG 1403 – Programming Logic 2
+Semester: Spring 2026
+Project: HW2 – Contact List
+Author: Rakshith Jayakarthikeyan
+"""
+
 from datetime import date, datetime
 import csv
 from contact import Contact
@@ -53,7 +60,7 @@ def parse_date(text):
 
 
 def sort_contacts():
-    contacts.sort(key=lambda c: (c.last_name, c.first_name))
+    contacts.sort(key = lambda c: (c.last_name, c.first_name))
 
 
 def add_contact():
@@ -81,10 +88,10 @@ def display_contacts():
         print("No contacts.")
         return
 
-    print(f"{'Last Name, First Name':<28}{'Birthdate':<14}{'Age':>3}")
+    print(f"{'Last Name, First Name':<28} {'Birthdate':<14} {'Age':>3}")
 
     for c in contacts:
-        print(f"{c.get_display_name():<28}{c.get_birthdate_str():<14}{c.get_age():>3}")
+        print(f"{c.get_display_name():<28} {c.get_birthdate_str():<14} {c.get_age():>3}")
 
 
 def import_contacts():
@@ -107,7 +114,7 @@ def import_contacts():
 
 def export_contacts():
     try:
-        with open(FILE_NAME, "w", newline="") as f:
+        with open(FILE_NAME, "w", newline = "") as f:
             writer = csv.writer(f)
             for c in contacts:
                 writer.writerow([c.first_name, c.last_name, c.get_birthdate_str()])
@@ -132,7 +139,7 @@ def delete_contact():
 
 def main():
     print("HW2 – Contact List")
-    print("Solution by YOUR NAME")
+    print("Solution by Rakshith Jayakarthikeyan")
     print()
 
     while True:
