@@ -1,5 +1,6 @@
 from datetime import date
 
+
 class Contact:
     def __init__(self, last_name, first_name, birthday):
         self.last_name = last_name.lower()
@@ -13,4 +14,8 @@ class Contact:
         return self.birthday.isoformat()
 
     def get_age(self):
-        return date.today().year - self.birthday.year
+        today = date.today()
+        years = today.year - self.birthday.year
+        if (today.month, today.day) < (self.birthday.month, self.birthday.day):
+            years -= 1
+        return years

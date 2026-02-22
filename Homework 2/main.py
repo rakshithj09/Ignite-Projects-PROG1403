@@ -5,12 +5,15 @@ Project: HW2 – Contact List
 Author: Rakshith Jayakarthikeyan
 """
 
+import sys
 from datetime import date, datetime
+from pathlib import Path
 import csv
 from contact import Contact
 
+
+FILE_NAME = Path(__file__).resolve().parent / "Contacts.csv"
 contacts = []
-FILE_NAME = "Contacts.csv"
 
 
 def print_menu():
@@ -23,104 +26,88 @@ def print_menu():
 
 
 def parse_date(text):
-    try:
-        if "/" in text:
-            parts = text.split("/")
-            if len(parts) == 3:
-                month = int(parts[0])
-                day = int(parts[1])
-                year = int(parts[2])
-                if year < 100:
-                    year += 2000
-            elif len(parts) == 2:
-                month = int(parts[0])
-                day = int(parts[1])
-                year = 2026
-            else:
-                return None
-
-        elif "-" in text:
-            parts = text.split("-")
-            if len(parts) != 3:
-                return None
-            year = int(parts[0])
-            month = int(parts[1])
-            day = int(parts[2])
-
-        else:
-            return None
-
-        if year < 1800 or year > 2200:
-            return None
-
-        return date(year, month, day)
-
-    except:
+    text = text.strip()
+    if not text:
         return None
 
+    for fmt in ("%m/%d/%Y", "%m/%d/%y", "%Y-%m-%d"):
+        try:
+            parsed = datetime.strptime(text, fmt).date()
+            if 1800 <= parsed.year <= 2200:
+                return parsed
+            return None
+        except ValueError:
+            continue
 
-def sort_contacts():
-    contacts.sort(key = lambda c: (c.last_name, c.first_name))
+    if "/" in text:
+        try:
+            month, day = [int(part) for part in text.split("/")]
+            return date(2026, month, day)
+        except (ValueError, TypeError):
+            return None
+
+    return None
 
 
 def add_contact():
     first = input("Enter first name: ").strip()
     last = input("Enter last name: ").strip()
 
-    if first == "" or last == "":
+    if not first or not last:
         print("Invalid name.")
         return
 
-    bday = None
-    while bday is None:
-        raw = input("Enter birthday (m/d/y, m/d, or y-m-d): ")
-        bday = parse_date(raw)
-        if bday is None:
+    birthday = None
+    while birthday is None:
+        birthday = parse_date(input("Enter birthday (m/d/y, m/d, or y-m-d): "))
+        if birthday is None:
             print("Invalid date. Try again.")
 
-    contacts.append(Contact(last, first, bday))
-    sort_contacts()
+    contacts.append(Contact(last, first, birthday))
+    contacts.sort(key=lambda c: (c.last_name, c.first_name))
     print("Contact added.")
 
 
 def display_contacts():
-    if len(contacts) == 0:
+    if not contacts:
         print("No contacts.")
         return
 
     print(f"{'Last Name, First Name':<28} {'Birthdate':<14} {'Age':>3}")
-
-    for c in contacts:
-        print(f"{c.get_display_name():<28} {c.get_birthdate_str():<14} {c.get_age():>3}")
+    for contact in contacts:
+        print(
+            f"{contact.get_display_name():<28} "
+            f"{contact.get_birthdate_str():<14} "
+            f"{contact.get_age():>3}"
+        )
 
 
 def import_contacts():
     try:
-        with open(FILE_NAME, newline="") as f:
-            reader = csv.reader(f)
-            for row in reader:
-                first = row[0].strip()
-                last = row[1].strip()
-                bday = parse_date(row[2].strip())
-                if bday:
-                    contacts.append(Contact(last, first, bday))
-
-        sort_contacts()
+        with open(FILE_NAME, newline="") as csv_file:
+            for row in csv.reader(csv_file):
+                if len(row) < 3:
+                    continue
+                first, last, birthday = row[:3]
+                parsed_date = parse_date(birthday)
+                if parsed_date:
+                    contacts.append(Contact(last.strip(), first.strip(), parsed_date))
+        contacts.sort(key=lambda c: (c.last_name, c.first_name))
         print("Contacts imported.")
-
-    except:
+    except Exception:
         print("Import failed.")
 
 
 def export_contacts():
     try:
-        with open(FILE_NAME, "w", newline = "") as f:
-            writer = csv.writer(f)
-            for c in contacts:
-                writer.writerow([c.first_name, c.last_name, c.get_birthdate_str()])
+        with open(FILE_NAME, "w", newline="") as csv_file:
+            writer = csv.writer(csv_file)
+            for contact in contacts:
+                writer.writerow(
+                    [contact.first_name, contact.last_name, contact.get_birthdate_str()]
+                )
         print("Contacts exported.")
-
-    except:
+    except Exception:
         print("Export failed.")
 
 
@@ -128,12 +115,11 @@ def delete_contact():
     first = input("Enter first name to delete: ").strip().lower()
     last = input("Enter last name to delete: ").strip().lower()
 
-    for c in contacts:
-        if c.first_name == first and c.last_name == last:
-            contacts.remove(c)
+    for contact in contacts:
+        if contact.first_name == first and contact.last_name == last:
+            contacts.remove(contact)
             print("Contact deleted.")
             return
-
     print("Contact not found.")
 
 
@@ -142,24 +128,26 @@ def main():
     print("Solution by Rakshith Jayakarthikeyan")
     print()
 
+    actions = {
+        "1": add_contact,
+        "2": import_contacts,
+        "3": display_contacts,
+        "4": export_contacts,
+        "5": delete_contact,
+    }
+
     while True:
         print_menu()
         choice = input("Enter choice: ").strip()
         print()
 
-        if choice == "1":
-            add_contact()
-        elif choice == "2":
-            import_contacts()
-        elif choice == "3":
-            display_contacts()
-        elif choice == "4":
-            export_contacts()
-        elif choice == "5":
-            delete_contact()
-        elif choice == "6":
+        if choice == "6":
             print("HW2 Complete")
             break
+
+        action = actions.get(choice)
+        if action:
+            action()
         else:
             print("Invalid choice.")
 
