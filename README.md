@@ -66,5 +66,8 @@ python3 "Homework 7"/main.py
 - Input validation and error handling
 - Working with `datetime` module
 - Loops and conditional logic
-- Skill #4
-- Skill #5
+- CSV file processing and persistence
+- Building menu-driven console workflows
+- Skill #6
+- Skill #7
+- Skill #8
