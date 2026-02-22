@@ -12,9 +12,9 @@ It accepts multiple date formats, validates input, and counts full, Saturday-onl
 The program uses the `datetime` module and allows repeated runs through a user prompt.
 
 ### Homework 2 – Contact List #1
-Line 1 description. 
-Line 2 description. 
-Line 3 description. 
+Menu-driven contact manager that lets users add, import, view, export, and delete contacts.
+Birthdays accept multiple date formats and each contact’s current age is computed from today’s date.
+Contacts persist via `Contacts.csv` inside the Homework 2 folder, so the console output and exports stay in sync.
 
 ### Homework 3 – Vehicle Sales
 Line 1 description. 
