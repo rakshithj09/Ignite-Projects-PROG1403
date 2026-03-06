@@ -5,15 +5,18 @@ Project: HW3 – Vehicle Sales
 Author: Rakshith Jayakarthikeyan
 """
 
-from __future__ import annotations
+from pathlib import Path
 
 from data_manager import DataManager
 from display_utils import print_annual_table, print_monthly_table
 from brand import Brand
-from model import Model
+from model import Displayable
 
 
-def read_menu_choice() -> int:
+DATA_FILE = Path(__file__).with_name("US Vehicle Model Sales by Month 2025.txt")
+
+
+def read_menu_choice():
     while True:
         s = input("Select an action by its number: (0-5) ").strip()
         try:
@@ -26,7 +29,7 @@ def read_menu_choice() -> int:
         print("Enter a number from 0 to 5.")
 
 
-def print_menu() -> None:
+def print_menu():
     print("Choose an action from this list by its number:")
     print("1 - Import Vehicle Sales Data")
     print("2 - Display annual Sales Data for all Brands")
@@ -36,68 +39,80 @@ def print_menu() -> None:
     print("0 - Exit")
 
 
-def choose_brand(dm: DataManager) -> Brand | None:
+def choose_brand(dm):
     brands = dm.brands_sorted()
     if not brands:
         return None
 
     print("Select a brand from this list by name or number:")
-    for i, b in enumerate(brands, start=1):
-        print(f"{i:>2} - {b.name}")
+    for i, brand in enumerate(brands, start = 1):
+        print(f"{i:>2} - {brand.name}")
+
+    lookup = {str(i): brand for i, brand in enumerate(brands, start = 1)}
+    lookup.update({brand.name.lower(): brand for brand in brands})
 
     while True:
-        raw = input("Choose a brand by entering its name or number: ").strip()
-        if raw == "":
+        raw = input("Choose a brand by entering its name or number: ").strip().lower()
+        if not raw:
             print("Enter a brand name or a number from the list.")
             continue
 
-        if raw.isdigit():
-            idx = int(raw)
-            if 1 <= idx <= len(brands):
-                return brands[idx - 1]
-            print("Number not in range.")
-            continue
-
-        for b in brands:
-            if b.name.lower() == raw.lower():
-                return b
-
-        print("Brand not found. Try again.")
+        match lookup.get(raw):
+            case Brand() as brand:
+                return brand
+            case _:
+                print("Brand not found. Try again.")
 
 
-def ensure_loaded(dm: DataManager) -> bool:
+def ensure_loaded(dm):
     if dm.is_loaded():
         return True
     print("Data not loaded. Use option 1 first.")
     return False
 
 
-def option_import(dm: DataManager) -> None:
-    import os
-
-    filename = "US Vehicle Model Sales by Month 2025.txt"
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    path = os.path.join(base_dir, filename)
-
-    ok, msg = dm.import_from_tsv(path)
+def option_import(dm):
+    ok, msg = dm.import_from_tsv(str(DATA_FILE))
     print(msg)
 
 
-def option_annual_all(dm: DataManager) -> None:
+def option_annual_all(dm):
+    show_all_brands(dm, "Annual Sales for All Brands", print_annual_table)
+
+
+def option_monthly_all(dm):
+    show_all_brands(dm, "Monthly Sales for All Brands", print_monthly_table)
+
+
+def option_annual_one_brand(dm):
+    show_one_brand(dm, "Annual Sales for All Models of one Brand", print_annual_table)
+
+
+def option_monthly_one_brand(dm):
+    show_one_brand(dm, "Monthly Sales for All Models of one Brand", print_monthly_table)
+
+
+class _BrandTotal(Displayable):
+    def __init__(self, brand):
+        self._brand = brand
+
+    def get_name_fields(self):
+        return (self._brand.name, "Total")
+
+    def get_annual_value(self):
+        return self._brand.get_annual_value()
+
+    def get_monthly_values(self):
+        return self._brand.get_monthly_values()
+
+
+def show_all_brands(dm, title, printer):
     if not ensure_loaded(dm):
         return
-    rows = dm.brands_sorted()
-    print_annual_table("Annual Sales for All Brands", rows)
+    printer(title, dm.brands_sorted())
 
 
-def option_monthly_all(dm: DataManager) -> None:
-    if not ensure_loaded(dm):
-        return
-    rows = dm.brands_sorted()
-    print_monthly_table("Monthly Sales for All Brands", rows)
-
-
-def option_annual_one_brand(dm: DataManager) -> None:
+def show_one_brand(dm, title, printer):
     if not ensure_loaded(dm):
         return
     brand = choose_brand(dm)
@@ -105,53 +120,14 @@ def option_annual_one_brand(dm: DataManager) -> None:
         print("No brands found.")
         return
 
-    models = sorted(brand.models(), key=lambda m: m.model_name.lower())
-
-    rows = []
-    for m in models:
-        rows.append(m)
-
-    rows.append(_brand_total_as_displayable(brand))
-
-    print_annual_table("Annual Sales for All Models of one Brand", rows)
+    rows = sorted(brand.models(), key=lambda m: m.model_name.lower())
+    rows.append(_BrandTotal(brand))
+    printer(title, rows)
 
 
-def option_monthly_one_brand(dm: DataManager) -> None:
-    if not ensure_loaded(dm):
-        return
-    brand = choose_brand(dm)
-    if brand is None:
-        print("No brands found.")
-        return
-
-    models = sorted(brand.models(), key=lambda m: m.model_name.lower())
-
-    rows = []
-    for m in models:
-        rows.append(m)
-
-    rows.append(_brand_total_as_displayable(brand))
-
-    print_monthly_table("Monthly Sales for All Models of one Brand", rows)
-
-
-def _brand_total_as_displayable(brand: Brand):
-    class _TotalRow:
-        def get_name_fields(self):
-            return (brand.name, "Total")
-
-        def get_annual_value(self):
-            return brand.get_annual_value()
-
-        def get_monthly_values(self):
-            return brand.get_monthly_values()
-
-    return _TotalRow()
-
-
-def main() -> None:
+def main():
     print("HW3 - Vehicle Sales")
-    print("Solution by YOURNAME")
+    print("Solution by Rakshith Jayakarthikeyan")
     print()
 
     dm = DataManager()
@@ -164,16 +140,15 @@ def main() -> None:
         if choice == 0:
             print("HW3 Complete")
             return
-        if choice == 1:
-            option_import(dm)
-        elif choice == 2:
-            option_annual_all(dm)
-        elif choice == 3:
-            option_monthly_all(dm)
-        elif choice == 4:
-            option_annual_one_brand(dm)
-        elif choice == 5:
-            option_monthly_one_brand(dm)
+
+        actions = {
+            1: option_import,
+            2: option_annual_all,
+            3: option_monthly_all,
+            4: option_annual_one_brand,
+            5: option_monthly_one_brand,
+        }
+        actions[choice](dm)
 
         print()
 

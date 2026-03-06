@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from brand import Brand
 from model import Model
 from sales import Sales
@@ -7,39 +5,35 @@ from sales import Sales
 
 class DataManager:
     def __init__(self):
-        self._brands: dict[str, Brand] = {}
-        self._loaded = False
-
-    def is_loaded(self) -> bool:
-        return self._loaded
-
-    def clear(self) -> None:
         self._brands = {}
         self._loaded = False
 
-    def brand_names_sorted(self) -> list[str]:
-        return sorted(self._brands.keys(), key=lambda s: s.lower())
+    def is_loaded(self):
+        return self._loaded
 
-    def get_brand(self, name: str) -> Brand | None:
+    def clear(self):
+        self._brands = {}
+        self._loaded = False
+
+    def get_brand(self, name):
         return self._brands.get(name)
 
-    def brands_sorted(self) -> list[Brand]:
-        return [self._brands[n] for n in self.brand_names_sorted()]
+    def brands_sorted(self):
+        return sorted(self._brands.values(), key=lambda b: b.name.lower())
 
-    def import_from_tsv(self, filepath: str) -> tuple[bool, str]:
+    def import_from_tsv(self, filepath):
         try:
             with open(filepath, "r", encoding="utf-8-sig", newline="") as f:
                 lines = f.read().splitlines()
         except Exception as ex:
             return (False, f"File error: {ex}")
 
-        header_index = self._find_header_index(lines)
+        header_index = self.find_header_index(lines)
         if header_index is None:
             return (False, "Header row not found. Expected Brand, Model, and 12 months.")
 
-        header_cols = self._split_cols(lines[header_index])
-        month_indexes = self._map_month_columns(header_cols)
-        if month_indexes is None:
+        header_cols = self.split_cols(lines[header_index])
+        if not self.has_all_months(header_cols):
             return (False, "Month columns not found. Expected Jan..Dec in the header row.")
 
         self.clear()
@@ -48,12 +42,7 @@ class DataManager:
         parsed_rows = 0
 
         for raw in data_lines:
-            if not raw.strip():
-                continue
-
-            tokens = self._split_cols(raw)
-
-            # Need: name tokens + 12 monthly values
+            tokens = self.split_cols(raw)
             if len(tokens) < 14:
                 continue
 
@@ -62,20 +51,13 @@ class DataManager:
             if len(name_tokens) < 2:
                 continue
 
-            brand_name, model_name = self._split_brand_model(name_tokens)
+            brand_name, model_name = self.split_brand_model(name_tokens)
             if not brand_name or not model_name:
                 continue
 
-            monthly_values = [self._safe_int(x) for x in month_tokens]
-
-            sales = Sales(monthly_values)
-            model = Model(brand_name, model_name, sales)
-
-            brand = self._brands.get(brand_name)
-            if brand is None:
-                brand = Brand(brand_name)
-                self._brands[brand_name] = brand
-            brand.add_model(model)
+            sales = Sales([self.safe_int(x) for x in month_tokens])
+            brand = self._brands.setdefault(brand_name, Brand(brand_name))
+            brand.add_model(Model(brand_name, model_name, sales))
 
             parsed_rows += 1
 
@@ -86,12 +68,10 @@ class DataManager:
         self._loaded = True
         return (True, f"Loaded {parsed_rows} models across {len(self._brands)} brands.")
 
-    def _split_cols(self, line: str) -> list[str]:
-        # Supports tabs or spaces, collapses repeats
-        line = line.strip().replace("\t", " ")
-        return line.split()
+    def split_cols(self, line):
+        return line.replace("\t", " ").split()
 
-    def _split_brand_model(self, name_tokens: list[str]) -> tuple[str, str]:
+    def split_brand_model(self, name_tokens):
         # Handle known 2 word brands in this dataset
         two_word_brands = {("Alfa", "Romeo"), ("Land", "Rover")}
 
@@ -105,7 +85,7 @@ class DataManager:
         model = " ".join(name_tokens[1:]).strip()
         return brand, model
 
-    def _safe_int(self, text: str) -> int:
+    def safe_int(self, text):
         s = text.strip().replace(",", "")
         if s == "":
             return 0
@@ -114,24 +94,18 @@ class DataManager:
         except Exception:
             return 0
 
-    def _find_header_index(self, lines: list[str]) -> int | None:
+    def find_header_index(self, lines):
         for i, line in enumerate(lines):
-            cols = [c.strip() for c in self._split_cols(line)]
+            cols = [c.lower() for c in self.split_cols(line)]
             if len(cols) < 14:
                 continue
-            if cols[0].lower() == "brand" and cols[1].lower() == "model":
+            if cols[:2] == ["brand", "model"]:
                 return i
-            first_three = [c.lower() for c in cols[:3]]
-            if "brand" in first_three and "model" in first_three:
+            if {"brand", "model"}.issubset(cols[:3]):
                 return i
         return None
 
-    def _map_month_columns(self, header_cols: list[str]) -> list[int] | None:
-        lookup = {c.strip().lower(): idx for idx, c in enumerate(header_cols)}
+    def has_all_months(self, header_cols):
         months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"]
-        indexes: list[int] = []
-        for m in months:
-            if m not in lookup:
-                return None
-            indexes.append(lookup[m])
-        return indexes
+        normalized = {c.strip().lower() for c in header_cols}
+        return all(m in normalized for m in months)
