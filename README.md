@@ -21,12 +21,12 @@ Console app that imports “US Vehicle Model Sales by Month 2025.txt” and stor
 Menu options print annual and monthly tables for all brands or one brand’s lineup, matching the instructor’s formatting exactly.
 Guards handle missing files, bad rows, or users running reports before importing so the program never crashes mid-demo.
 
-### Homework _ – <Title>
+### Homework 4 – Contact List #2
 Line 1 description. 
 Line 2 description. 
 Line 3 description. 
 
-### Homework _ – <Title>
+### Homework 5 – Zip File
 Line 1 description. 
 Line 2 description. 
 Line 3 description. 
@@ -44,8 +44,8 @@ Ignite Technology Projects/
 ├── Homework 1/
 ├── Homework 2/
 ├── Homework 3/
-├── Homework _/
-├── Homework _/
+├── Homework 4/
+├── Homework 5/
 └── Homework _/
 ```
 
@@ -58,8 +58,8 @@ python3 <folder>/main.py
 
 Examples:
 ```
-python3 "Homework 4"/main.py
-python3 "Homework 7"/main.py
+python3 "Homework 1"/main.py
+python3 "Homework 5"/main.py
 ```
 
 ## Skills Learned
