@@ -17,9 +17,9 @@ Birthdays accept multiple date formats and each contact’s current age is compu
 Contacts persist via `Contacts.csv` inside the Homework 2 folder, so the console output and exports stay in sync.
 
 ### Homework 3 – Vehicle Sales
-Line 1 description. 
-Line 2 description. 
-Line 3 description. 
+Console app that imports “US Vehicle Model Sales by Month 2025.txt” and stores brands/models with their 12 monthly totals.
+Menu options print annual and monthly tables for all brands or one brand’s lineup, matching the instructor’s formatting exactly.
+Guards handle missing files, bad rows, or users running reports before importing so the program never crashes mid-demo.
 
 ### Homework _ – <Title>
 Line 1 description. 
@@ -68,6 +68,13 @@ python3 "Homework 7"/main.py
 - Loops and conditional logic
 - CSV file processing and persistence
 - Building menu-driven console workflows
-- Skill #6
-- Skill #7
+- Parsing TSV files into custom data classes
+- Formatting tabular console output with reusable helpers
 - Skill #8
+- Skill #9
+- Skill #10
+- Skill #11
+- Skill #12
+- Skill #13
+- Skill #14
+- Skill #15
