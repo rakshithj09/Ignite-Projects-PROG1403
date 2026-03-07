@@ -19,7 +19,9 @@ class DataManager:
         return self._brands.get(name)
 
     def brands_sorted(self):
-        return sorted(self._brands.values(), key=lambda b: b.name.lower())
+        brand_list = list(self._brands.values())
+        brand_list.sort(key = lambda b: b.name.lower())
+        return brand_list
 
     def import_from_tsv(self, filepath):
         try:
@@ -55,8 +57,14 @@ class DataManager:
             if not brand_name or not model_name:
                 continue
 
-            sales = Sales([self.safe_int(x) for x in month_tokens])
-            brand = self._brands.setdefault(brand_name, Brand(brand_name))
+            monthly_values = []
+            for value in month_tokens:
+                monthly_values.append(self.safe_int(value))
+            sales = Sales(monthly_values)
+
+            if brand_name not in self._brands:
+                self._brands[brand_name] = Brand(brand_name)
+            brand = self._brands[brand_name]
             brand.add_model(Model(brand_name, model_name, sales))
 
             parsed_rows += 1

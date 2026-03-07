@@ -5,7 +5,7 @@ Project: HW3 – Vehicle Sales
 Author: Rakshith Jayakarthikeyan
 """
 
-from pathlib import Path
+import os
 
 from data_manager import DataManager
 from display_utils import print_annual_table, print_monthly_table
@@ -13,24 +13,24 @@ from brand import Brand
 from model import Displayable
 
 
-DATA_FILE = Path(__file__).with_name("US Vehicle Model Sales by Month 2025.txt")
+DATA_FILE = os.path.join(os.path.dirname(__file__), "US Vehicle Model Sales by Month 2025.txt")
 
 
 def read_menu_choice():
     while True:
-        s = input("Select an action by its number: (0-5) ").strip()
+        s = input("Select an action by its number: (0-5): ").strip()
         try:
             n = int(s)
         except Exception:
-            print("Enter a whole number from 0 to 5.")
+            print("Enter a whole number from 0 to 5: ")
             continue
         if 0 <= n <= 5:
             return n
-        print("Enter a number from 0 to 5.")
+        print("Enter a number from 0 to 5: ")
 
 
 def print_menu():
-    print("Choose an action from this list by its number:")
+    print("Choose an action from this list by its number: ")
     print("1 - Import Vehicle Sales Data")
     print("2 - Display annual Sales Data for all Brands")
     print("3 - Display monthly Sales Data for all Brands")
@@ -45,29 +45,34 @@ def choose_brand(dm):
         return None
 
     print("Select a brand from this list by name or number:")
-    for i, brand in enumerate(brands, start = 1):
+    for i, brand in enumerate(brands, start=1):
         print(f"{i:>2} - {brand.name}")
 
-    lookup = {str(i): brand for i, brand in enumerate(brands, start = 1)}
-    lookup.update({brand.name.lower(): brand for brand in brands})
-
     while True:
-        raw = input("Choose a brand by entering its name or number: ").strip().lower()
-        if not raw:
+        raw = input("Choose a brand by entering its name or number: ").strip()
+        if raw == "":
             print("Enter a brand name or a number from the list.")
             continue
 
-        match lookup.get(raw):
-            case Brand() as brand:
+        if raw.isdigit():
+            idx = int(raw)
+            if 1 <= idx <= len(brands):
+                return brands[idx - 1]
+            print("Number not in range.")
+            continue
+
+        lowered = raw.lower()
+        for brand in brands:
+            if brand.name.lower() == lowered:
                 return brand
-            case _:
-                print("Brand not found. Try again.")
+
+        print("Brand not found. Try again.")
 
 
 def ensure_loaded(dm):
     if dm.is_loaded():
         return True
-    print("Data not loaded. Use option 1 first.")
+    print("Data not loaded. Use option 1 first")
     return False
 
 
@@ -120,7 +125,8 @@ def show_one_brand(dm, title, printer):
         print("No brands found.")
         return
 
-    rows = sorted(brand.models(), key=lambda m: m.model_name.lower())
+    rows = brand.models()
+    rows.sort(key=lambda m: m.model_name.lower())
     rows.append(_BrandTotal(brand))
     printer(title, rows)
 
@@ -141,14 +147,16 @@ def main():
             print("HW3 Complete")
             return
 
-        actions = {
-            1: option_import,
-            2: option_annual_all,
-            3: option_monthly_all,
-            4: option_annual_one_brand,
-            5: option_monthly_one_brand,
-        }
-        actions[choice](dm)
+        if choice == 1:
+            option_import(dm)
+        elif choice == 2:
+            option_annual_all(dm)
+        elif choice == 3:
+            option_monthly_all(dm)
+        elif choice == 4:
+            option_annual_one_brand(dm)
+        elif choice == 5:
+            option_monthly_one_brand(dm)
 
         print()
 
