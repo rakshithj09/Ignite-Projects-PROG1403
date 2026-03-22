@@ -22,9 +22,11 @@ Menu options print annual and monthly tables for all brands or one brand’s lin
 Guards handle missing files, bad rows, or users running reports before importing so the program never crashes mid-demo.
 
 ### Homework 4 – Contact List #2
-Line 1 description. 
-Line 2 description. 
-Line 3 description. 
+Advanced contact manager that stores contacts in a **Binary Search Tree (BST)** for efficient alphabetical organization.
+Users can add, edit, delete, search, import, and export contacts through a 9-option menu interface.
+Each contact stores first name, last name, birthdate (with age auto-calculation), and phone number (formatted as +c (aaa) nnn-nnnn).
+Supports CSV import/export, date validation in multiple formats, and field-based search (by last name, first name, birthdate, or phone).
+Demonstrates object-oriented design with Contact, BST, and DataManager classes. 
 
 ### Homework 5 – Zip File
 Line 1 description. 
@@ -70,11 +72,10 @@ python3 "Homework 5"/main.py
 - Building menu-driven console workflows
 - Parsing TSV files into custom data classes
 - Formatting tabular console output with reusable helpers
-- Skill #8
-- Skill #9
-- Skill #10
-- Skill #11
-- Skill #12
-- Skill #13
+- Implementing Binary Search Trees (BST) from scratch
+- Recursive algorithms (tree traversal, insertion, deletion)
+- Object-oriented design and class hierarchies
+- Searching and sorting with custom data structures
+- Phone number formatting and validation
 - Skill #14
 - Skill #15
